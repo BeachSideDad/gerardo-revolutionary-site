@@ -21,13 +21,15 @@ export function AccessibleCanvas({
   const [isWebGLSupported, setIsWebGLSupported] = useState(true);
   
   useEffect(() => {
-    // Check WebGL support
-    const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-    setIsWebGLSupported(!!gl);
-    
-    if (!gl) {
-      setAnnouncement('3D visualization requires WebGL support. Please use a modern browser.');
+    // Check WebGL support only on client
+    if (typeof document !== 'undefined') {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      setIsWebGLSupported(!!gl);
+      
+      if (!gl) {
+        setAnnouncement('3D visualization requires WebGL support. Please use a modern browser.');
+      }
     }
   }, []);
   

@@ -5,6 +5,11 @@ export interface GPUTier {
 }
 
 export function detectGPUTier(): GPUTier {
+  // Check if we're on the server
+  if (typeof window === 'undefined' || typeof document === 'undefined' || typeof navigator === 'undefined') {
+    return { tier: 'medium', fps: 45, isMobile: false };
+  }
+  
   // Check if mobile device
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
     navigator.userAgent
@@ -51,6 +56,11 @@ export function detectGPUTier(): GPUTier {
 }
 
 export function getAdaptiveParticleCount(baseCount: number = 1500): number {
+  // SSR safety - return medium tier count on server
+  if (typeof window === 'undefined') {
+    return Math.floor(baseCount * 0.6);
+  }
+  
   const gpu = detectGPUTier();
   
   switch (gpu.tier) {
