@@ -47,6 +47,8 @@ export function MagneticVortexButton({
     ['0px', `${intensity * 10}px`]
   );
   
+  const borderOpacity = useTransform(glow, [0, 1], [1, 0.5]);
+  
   // Handle mouse movement for vortex effect
   const handleMouseMove = (e: MouseEvent<HTMLElement>) => {
     if (!buttonRef.current || !isHovering) return;
@@ -225,7 +227,7 @@ export function MagneticVortexButton({
           }`}
           style={{ 
             scale,
-            opacity: useTransform(glow, [0, 1], [1, 0.5])
+            opacity: borderOpacity
           }}
         />
       )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -30,56 +30,8 @@ export function NeuralPulse({
   const lastPulseTime = useRef(0);
   const lastInteractionPoint = useRef(new THREE.Vector3(0, 0, 0));
   
-  // Auto pulse timer
-  useEffect(() => {
-    if (!enabled) return;
-    
-    const interval = setInterval(() => {
-      const now = Date.now();
-      if (now - lastPulseTime.current > autoInterval) {
-        triggerPulse({
-          origin: lastInteractionPoint.current.clone(),
-          type: 'auto'
-        });
-      }
-    }, 1000);
-    
-    return () => clearInterval(interval);
-  }, [enabled, autoInterval]);
-  
-  // Listen for user interactions
-  useEffect(() => {
-    const handleClick = (event: MouseEvent) => {
-      const x = (event.clientX / window.innerWidth) * 2 - 1;
-      const y = -(event.clientY / window.innerHeight) * 2 + 1;
-      const origin = new THREE.Vector3(x * 10, y * 10, 0);
-      
-      lastInteractionPoint.current = origin;
-      triggerPulse({ origin, type: 'user' });
-    };
-    
-    const handleTouch = (event: TouchEvent) => {
-      if (event.touches.length > 0) {
-        const touch = event.touches[0];
-        const x = (touch.clientX / window.innerWidth) * 2 - 1;
-        const y = -(touch.clientY / window.innerHeight) * 2 + 1;
-        const origin = new THREE.Vector3(x * 10, y * 10, 0);
-        
-        lastInteractionPoint.current = origin;
-        triggerPulse({ origin, type: 'user' });
-      }
-    };
-    
-    window.addEventListener('click', handleClick);
-    window.addEventListener('touchstart', handleTouch);
-    
-    return () => {
-      window.removeEventListener('click', handleClick);
-      window.removeEventListener('touchstart', handleTouch);
-    };
-  }, []);
-  
-  const triggerPulse = (config: Partial<PulseConfig>) => {
+  // Trigger pulse function
+  const triggerPulse = useCallback((config: Partial<PulseConfig>) => {
     const defaultConfig: PulseConfig = {
       origin: new THREE.Vector3(0, 0, 0),
       color: '#00D4FF',
@@ -121,7 +73,56 @@ export function NeuralPulse({
     setTimeout(() => {
       setPulses(prev => prev.filter(p => p.timestamp !== defaultConfig.timestamp));
     }, 3000);
-  };
+  }, [onPulse]);
+  
+  // Auto pulse timer
+  useEffect(() => {
+    if (!enabled) return;
+    
+    const interval = setInterval(() => {
+      const now = Date.now();
+      if (now - lastPulseTime.current > autoInterval) {
+        triggerPulse({
+          origin: lastInteractionPoint.current.clone(),
+          type: 'auto'
+        });
+      }
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [enabled, autoInterval, triggerPulse]);
+  
+  // Listen for user interactions
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      const x = (event.clientX / window.innerWidth) * 2 - 1;
+      const y = -(event.clientY / window.innerHeight) * 2 + 1;
+      const origin = new THREE.Vector3(x * 10, y * 10, 0);
+      
+      lastInteractionPoint.current = origin;
+      triggerPulse({ origin, type: 'user' });
+    };
+    
+    const handleTouch = (event: TouchEvent) => {
+      if (event.touches.length > 0) {
+        const touch = event.touches[0];
+        const x = (touch.clientX / window.innerWidth) * 2 - 1;
+        const y = -(touch.clientY / window.innerHeight) * 2 + 1;
+        const origin = new THREE.Vector3(x * 10, y * 10, 0);
+        
+        lastInteractionPoint.current = origin;
+        triggerPulse({ origin, type: 'user' });
+      }
+    };
+    
+    window.addEventListener('click', handleClick);
+    window.addEventListener('touchstart', handleTouch);
+    
+    return () => {
+      window.removeEventListener('click', handleClick);
+      window.removeEventListener('touchstart', handleTouch);
+    };
+  }, [triggerPulse]);
   
   // Render pulse waves
   useFrame((state, delta) => {
