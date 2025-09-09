@@ -4,6 +4,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './LiquidTransition.module.css';
 
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  color: string;
+  life: number;
+}
+
 interface LiquidTransitionProps {
   isTransitioning: boolean;
   onComplete?: () => void;
@@ -19,15 +29,7 @@ export function LiquidTransition({
 }: LiquidTransitionProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
-  const [particles, setParticles] = useState<Array<{
-    x: number;
-    y: number;
-    vx: number;
-    vy: number;
-    size: number;
-    color: string;
-    life: number;
-  }>>([]);
+  const [particles, setParticles] = useState<Particle[]>([]);
 
   // Liquid morph animation variants
   const liquidVariants = {
@@ -65,7 +67,7 @@ export function LiquidTransition({
     canvas.height = window.innerHeight;
 
     // Generate particles for dissolution effect
-    const newParticles = [];
+    const newParticles: Particle[] = [];
     const particleCount = 500;
     
     for (let i = 0; i < particleCount; i++) {

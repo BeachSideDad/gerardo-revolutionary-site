@@ -152,7 +152,7 @@ class TMJAIAnalyzer {
       }
     }
     
-    return [...new Set(recommendations)]; // Remove duplicates
+    return Array.from(new Set(recommendations)); // Remove duplicates
   }
   
   suggestRPM(patterns: SymptomPattern[]): number {

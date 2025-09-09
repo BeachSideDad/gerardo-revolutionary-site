@@ -30,14 +30,14 @@ const nextConfig = {
   
   // TypeScript configuration
   typescript: {
-    // Temporarily ignore type errors to fix build
-    ignoreBuildErrors: true,
+    // Type checking enabled for production safety
+    ignoreBuildErrors: false,
   },
   
   // ESLint configuration  
   eslint: {
-    // Temporarily ignore linting during build
-    ignoreDuringBuilds: true,
+    // Linting enabled for code quality
+    ignoreDuringBuilds: false,
   },
 };
 

@@ -1,14 +1,15 @@
 'use client';
 
-import { Canvas } from '@react-three/fiber';
 import { Preload, Stats, PerformanceMonitor, AdaptiveDpr, AdaptiveEvents } from '@react-three/drei';
 import { Suspense, useState } from 'react';
+import { AccessibleCanvas } from './AccessibleCanvas';
 
 export default function Scene({ children }: { children: React.ReactNode }) {
   const [dpr, setDpr] = useState(1.5);
   
   return (
-    <Canvas
+    <AccessibleCanvas
+      ariaLabel="3D neural universe visualization showing TMJ treatment concepts"
       camera={{ position: [0, 0, 5], fov: 75 }}
       gl={{ 
         antialias: true,
@@ -47,6 +48,6 @@ export default function Scene({ children }: { children: React.ReactNode }) {
       </Suspense>
       <Preload all />
       {process.env.NODE_ENV === 'development' && <Stats />}
-    </Canvas>
+    </AccessibleCanvas>
   );
 }
