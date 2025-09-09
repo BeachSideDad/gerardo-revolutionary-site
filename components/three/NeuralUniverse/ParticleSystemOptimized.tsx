@@ -44,7 +44,7 @@ export function ParticleSystemOptimized({
   size = 0.01,
   speed = 0.5,
   mouseInfluence = 0.3,
-  enableStats = true
+  enableStats = false
 }: ParticleSystemProps) {
   const mesh = useRef<THREE.InstancedMesh>(null);
   const mousePosition = useRef(new THREE.Vector2());

@@ -13,8 +13,11 @@ const Scene = dynamic(() => import('@/components/three/Scene'), {
 });
 
 const ParticleSystem = dynamic(() => 
-  import('@/components/three/NeuralUniverse/ParticleSystemOptimized').then(mod => ({ default: mod.ParticleSystemOptimized })), 
-  { ssr: false }
+  import('@/components/three/NeuralUniverse/ParticleSystemSafe').then(mod => ({ default: mod.ParticleSystemSafe })), 
+  { 
+    ssr: false,
+    loading: () => null
+  }
 );
 
 // Keep existing components
