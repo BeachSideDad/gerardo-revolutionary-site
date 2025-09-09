@@ -1,10 +1,11 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useRef } from 'react';
 import { revolutionaryInsights } from '@/lib/core-data';
 import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { soundSystem } from '@/lib/sound-system';
 
 // Dynamic imports for 3D components
 const Scene = dynamic(() => import('@/components/three/Scene'), {
@@ -12,11 +13,27 @@ const Scene = dynamic(() => import('@/components/three/Scene'), {
   loading: () => <div className="absolute inset-0 bg-black" />
 });
 
-const ParticleSystem = dynamic(() => 
-  import('@/components/three/NeuralUniverse/ParticleSystemSafe').then(mod => ({ default: mod.ParticleSystemSafe })), 
+const HeroBigBang = dynamic(() => 
+  import('@/components/three/HeroBigBang').then(mod => ({ default: mod.HeroBigBang })), 
+  { 
+    ssr: false,
+    loading: () => <div className="absolute inset-0 bg-black animate-pulse" />
+  }
+);
+
+const NeuralPulse = dynamic(() => 
+  import('@/components/three/NeuralPulse').then(mod => ({ default: mod.NeuralPulse })), 
   { 
     ssr: false,
     loading: () => null
+  }
+);
+
+const MagneticVortexButton = dynamic(() => 
+  import('@/components/ui/MagneticVortexButton').then(mod => ({ default: mod.MagneticVortexButton })), 
+  { 
+    ssr: false,
+    loading: () => <div className="h-16 w-48 bg-cyan-500/20 animate-pulse rounded-full" />
   }
 );
 
@@ -38,7 +55,9 @@ const AudienceContent = dynamic(() =>
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
+  const [heroLoaded, setHeroLoaded] = useState(false);
   const { scrollYProgress } = useScroll();
+  const particlesRef = useRef(null);
   
   // Transform scroll to opacity for fade effect
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
@@ -46,21 +65,27 @@ export default function Home() {
   
   useEffect(() => {
     setMounted(true);
+    // Initialize sound system
+    if (soundSystem) {
+      soundSystem.setEnabled(true);
+    }
   }, []);
 
   return (
     <main className="min-h-screen bg-black text-white overflow-x-hidden">
-      {/* 3D Background Scene */}
+      {/* 3D Background Scene with Hero Big Bang */}
       {mounted && (
         <div className="fixed inset-0 z-0">
           <Scene>
-            <ParticleSystem 
-              count={1500}
-              spread={15}
-              color="#00D9FF"
-              size={0.015}
-              speed={0.3}
-              mouseInfluence={0.5}
+            <HeroBigBang 
+              onLoadComplete={() => setHeroLoaded(true)}
+              particleCount={1500}
+              soundEnabled={true}
+            />
+            <NeuralPulse 
+              particles={particlesRef.current}
+              autoInterval={8000}
+              enabled={heroLoaded}
             />
           </Scene>
         </div>
@@ -98,25 +123,28 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1, duration: 0.8 }}
             >
-              <Link
-                href="/assessment"
-                className="group relative inline-flex items-center justify-center px-10 py-5 text-lg font-semibold overflow-hidden rounded-full"
-              >
-                <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-cyan-500 to-blue-600 group-hover:scale-110 transition-transform duration-300"></span>
-                <span className="relative flex items-center text-white">
-                  Take the Assessment
-                  <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </span>
-              </Link>
-              
-              <Link
-                href="/discovery"
-                className="group relative inline-flex items-center justify-center px-10 py-5 text-lg font-semibold border-2 border-cyan-400 rounded-full hover:bg-cyan-400/10 transition-colors"
-              >
-                <span className="text-cyan-400">Learn the Discovery</span>
-              </Link>
+              {heroLoaded && (
+                <>
+                  <MagneticVortexButton
+                    href="/assessment"
+                    variant="primary"
+                    intensity={0.8}
+                  >
+                    Take the Assessment
+                    <svg className="w-5 h-5 ml-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </MagneticVortexButton>
+                  
+                  <MagneticVortexButton
+                    href="/discovery"
+                    variant="ghost"
+                    intensity={0.6}
+                  >
+                    Learn the Discovery
+                  </MagneticVortexButton>
+                </>
+              )}
             </motion.div>
           </motion.div>
 
@@ -321,19 +349,24 @@ export default function Home() {
             {revolutionaryInsights.callToAction.secondary}
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <Link
-              href="/contact"
-              className="group relative px-10 py-5 overflow-hidden rounded-full font-semibold"
-            >
-              <span className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 group-hover:scale-110 transition-transform duration-300"></span>
-              <span className="relative text-white">Book a Consultation</span>
-            </Link>
-            <Link
-              href="/discovery"
-              className="px-10 py-5 bg-transparent border-2 border-cyan-400 text-cyan-400 rounded-full font-semibold hover:bg-cyan-400/10 transition-all"
-            >
-              Learn More
-            </Link>
+            {heroLoaded && (
+              <>
+                <MagneticVortexButton
+                  href="/contact"
+                  variant="primary"
+                  intensity={1}
+                >
+                  Book a Consultation
+                </MagneticVortexButton>
+                <MagneticVortexButton
+                  href="/discovery"
+                  variant="ghost"
+                  intensity={0.7}
+                >
+                  Learn More
+                </MagneticVortexButton>
+              </>
+            )}
           </div>
         </motion.div>
       </section>
