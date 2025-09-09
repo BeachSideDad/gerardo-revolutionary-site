@@ -22,13 +22,8 @@ const nextConfig = {
       use: ['raw-loader'],
     });
     
-    // Optimize Three.js imports
-    if (!isServer) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        'three': 'three/build/three.module.js',
-      };
-    }
+    // Remove Three.js alias - use default export path
+    // Three.js v0.160+ handles module resolution correctly
     
     return config;
   },
