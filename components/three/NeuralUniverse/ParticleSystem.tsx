@@ -135,10 +135,14 @@ export function ParticleSystem({
       
       // Apply transformation
       matrix.compose(position, rotation, scale);
-      mesh.current.setMatrixAt(i, matrix);
+      if (mesh.current) {
+        mesh.current.setMatrixAt(i, matrix);
+      }
     });
     
-    mesh.current.instanceMatrix.needsUpdate = true;
+    if (mesh.current && mesh.current.instanceMatrix) {
+      mesh.current.instanceMatrix.needsUpdate = true;
+    }
   });
   
   return (
