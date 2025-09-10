@@ -1,11 +1,10 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { Suspense, useEffect, useState, useRef } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { revolutionaryInsights } from '@/lib/core-data';
 import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { soundSystem } from '@/lib/sound-system';
 
 // Dynamic imports for 3D components
 const Scene = dynamic(() => import('@/components/three/Scene'), {
@@ -13,16 +12,16 @@ const Scene = dynamic(() => import('@/components/three/Scene'), {
   loading: () => <div className="absolute inset-0 bg-black" />
 });
 
-const HeroBigBang = dynamic(() => 
-  import('@/components/three/HeroBigBang').then(mod => ({ default: mod.HeroBigBang })), 
+const ThreeErrorBoundary = dynamic(() => 
+  import('@/components/three/ThreeErrorBoundary').then(mod => ({ default: mod.ThreeErrorBoundary })), 
   { 
     ssr: false,
-    loading: () => <div className="absolute inset-0 bg-black animate-pulse" />
+    loading: () => null
   }
 );
 
-const NeuralPulse = dynamic(() => 
-  import('@/components/three/NeuralPulse').then(mod => ({ default: mod.NeuralPulse })), 
+const ParticleSystem = dynamic(() => 
+  import('@/components/three/NeuralUniverse/ParticleSystemSafe').then(mod => ({ default: mod.ParticleSystemSafe })), 
   { 
     ssr: false,
     loading: () => null
@@ -55,9 +54,7 @@ const AudienceContent = dynamic(() =>
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
-  const [heroLoaded, setHeroLoaded] = useState(false);
   const { scrollYProgress } = useScroll();
-  const particlesRef = useRef(null);
   
   // Transform scroll to opacity for fade effect
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
@@ -65,29 +62,25 @@ export default function Home() {
   
   useEffect(() => {
     setMounted(true);
-    // Initialize sound system
-    if (soundSystem) {
-      soundSystem.setEnabled(true);
-    }
   }, []);
 
   return (
     <main className="min-h-screen bg-black text-white overflow-x-hidden">
-      {/* 3D Background Scene with Hero Big Bang */}
+      {/* 3D Background Scene */}
       {mounted && (
         <div className="fixed inset-0 z-0">
-          <Scene>
-            <HeroBigBang 
-              onLoadComplete={() => setHeroLoaded(true)}
-              particleCount={1500}
-              soundEnabled={true}
-            />
-            <NeuralPulse 
-              particles={particlesRef.current}
-              autoInterval={8000}
-              enabled={heroLoaded}
-            />
-          </Scene>
+          <ThreeErrorBoundary>
+            <Scene>
+              <ParticleSystem 
+                count={1500}
+                spread={15}
+                color="#00D9FF"
+                size={0.015}
+                speed={0.3}
+                mouseInfluence={0.5}
+              />
+            </Scene>
+          </ThreeErrorBoundary>
         </div>
       )}
       
@@ -123,7 +116,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 1, duration: 0.8 }}
             >
-              {heroLoaded && (
+              {mounted && (
                 <>
                   <MagneticVortexButton
                     href="/assessment"
@@ -349,7 +342,7 @@ export default function Home() {
             {revolutionaryInsights.callToAction.secondary}
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            {heroLoaded && (
+            {mounted && (
               <>
                 <MagneticVortexButton
                   href="/contact"
